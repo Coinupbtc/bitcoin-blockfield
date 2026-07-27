@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#07100f" />
+    <title>Blockfield — Bitcoin in motion</title>
+    <link rel="preconnect" href="https://mempool.space" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="styles.css?v=7" />
+  </head>
+  <body>
+    <div class="noise"></div>
+    <div class="app">
+      <header class="bar">
+        <a class="brand" href="#" aria-label="Blockfield">
+          <span class="brand-mark"><i></i><i></i><i></i></span>
+          <span>BLOCKFIELD</span>
+        </a>
+        <div class="bar-spacer"></div>
+        <button class="source-badge" id="nodeBadge" title="Choose your data source"><b></b> <span id="nodeLabel">MEMPOOL.SPACE</span></button>
+        <span class="pill price"><small>BTC</small> <b id="btcPrice">$--</b></span>
+        <span class="pill net"><i></i> MAINNET</span>
+        <button class="icon-button" id="soundToggle" aria-label="Toggle sound" title="Event sound off">⌁</button>
+        <button class="ghost-button sm" id="infoToggle">FIELD MANUAL</button>
+      </header>
+
+      <div class="grid">
+        <!-- LEFT: network telemetry -->
+        <aside class="rail left">
+          <div class="tile">
+            <span>BLOCK HEIGHT</span>
+            <strong id="height">#------</strong>
+            <small id="blockAge">LOCATING TIP</small>
+          </div>
+          <div class="tile">
+            <span>IN THE MEMPOOL</span>
+            <strong id="mempoolTx">--</strong>
+            <small id="mempoolSize">-- vMB WAITING</small>
+            <div class="tile-row"><span>UNCONFIRMED FEES</span><b id="mempoolFees">-- BTC</b></div>
+          </div>
+          <div class="tile">
+            <span>PURGE FLOOR</span>
+            <strong><i id="minFee">--</i> <b>sat/vB</b></strong>
+            <small>drop below this and you're evicted</small>
+          </div>
+          <div class="tile">
+            <span>NETWORK HASHRATE</span>
+            <strong id="hashrate" class="gold">--</strong>
+            <small id="difficultyNote">DIFFICULTY --</small>
+          </div>
+          <div class="tile">
+            <span>DIFFICULTY ADJUSTMENT</span>
+            <strong id="diffChange" class="mid">--%</strong>
+            <div class="mini-bar"><i id="diffMeter"></i></div>
+            <small id="diffEta">-- blocks • ~--</small>
+          </div>
+          <div class="tile">
+            <span>NEXT HALVING</span>
+            <strong id="halvingBlocks">-- blocks</strong>
+            <small id="halvingEta">subsidy <b id="subsidy">--</b> BTC</small>
+          </div>
+        </aside>
+
+        <!-- CENTER: the projected-block war -->
+        <section class="stage">
+          <div class="chain-strip" id="chainStrip">
+            <div class="strip-side projected" id="projectedBlocks"></div>
+            <div class="strip-now">
+              <span>NEXT BLOCK</span>
+              <b id="roundHeight">#---</b>
+              <i id="blockEta">~ --:--</i>
+            </div>
+            <div class="strip-arrow">⟶</div>
+            <div class="strip-side confirmed" id="confirmedBlocks"></div>
+          </div>
+
+          <div class="field" id="field">
+            <canvas id="fieldCanvas" aria-label="Three projected Bitcoin blocks colliding while live transactions and inscriptions fight for fee-band inclusion"></canvas>
+            <div class="field-tip" id="fieldTip" hidden></div>
+            <div class="field-hud">
+              <div class="hud-left">
+                <span class="live"><i></i> LIVE <b id="syncAge">CONNECTING</b></span>
+                <span class="pressure" id="pressureTag"><b id="pressureLabel">READING</b> · <i id="pressureFee">-- sat/vB cutoff</i></span>
+              </div>
+              <div class="hud-legend">
+                <span><i class="dot hot"></i> block-bound</span>
+                <span><i class="dot cool"></i> waiting</span>
+                <span><i class="ord-glyph">✦</i> inscription</span>
+              </div>
+            </div>
+            <div class="war-title"><span>PROJECTED BLOCK WAR</span><b>3 contenders · live fee bands</b></div>
+            <div class="battle-log" id="battleLog"><i></i><span>Block contenders entering the field…</span></div>
+            <button class="inscription-button" id="inscriptionRadar" title="Track an inscription transaction">✦ <span>INSCRIPTION RADAR</span></button>
+            <button class="field-pause" id="pauseBattle" title="Pause">Ⅱ</button>
+            <div class="block-found" id="blockFound"><span>BLOCK FOUND</span><strong id="foundHeight">#---</strong><p id="foundDetail">Miner sealed the round.</p></div>
+          </div>
+        </section>
+
+        <!-- RIGHT: fee routes + block detail + arrivals -->
+        <aside class="rail right">
+          <div class="tile lanes">
+            <span>FEE ROUTES <em id="feeUpdated">live</em></span>
+            <div class="lane high"><i></i><div><b>No priority</b><small id="fastEta">next block</small></div><strong><em id="fastFee">--</em> sat/vB<u id="fastUsd">~$--</u></strong></div>
+            <div class="lane mid"><i></i><div><b>Standard</b><small>~30 min</small></div><strong><em id="halfFee">--</em> sat/vB<u id="halfUsd">~$--</u></strong></div>
+            <div class="lane low"><i></i><div><b>Economy</b><small>hours</small></div><strong><em id="hourFee">--</em> sat/vB<u id="hourUsd">~$--</u></strong></div>
+          </div>
+
+          <div class="tile nextblock">
+            <span>NEXT BLOCK TEMPLATE</span>
+            <div class="kv"><b id="nbTx">-- tx</b><b id="nbSize">-- vMB</b></div>
+            <div class="tile-row"><span>MEDIAN FEE</span><b id="nbMedian">-- sat/vB</b></div>
+            <div class="tile-row"><span>FEE SPREAD</span><b id="nbRange">--</b></div>
+            <div class="tile-row"><span>MINER REWARD</span><b id="nbReward">-- BTC</b></div>
+          </div>
+
+          <div class="tile lastblock">
+            <div class="tile-head"><span>LAST BLOCK SEALED</span><a id="blockLink" href="https://mempool.space/" target="_blank" rel="noreferrer">VIEW ↗</a></div>
+            <strong id="latestHeight" class="lime">#------</strong>
+            <div class="tile-row"><span>MINER</span><b id="minerName">--</b></div>
+            <div class="tile-row"><span>TX / FEES</span><b><i id="blockTx">--</i> · <i id="blockFees">--</i></b></div>
+            <div class="tile-row"><span>MINED</span><b id="minedAt">--</b></div>
+          </div>
+
+          <div class="tile arrivals">
+            <span>LIVE ARRIVALS</span>
+            <div id="arrivalList" class="arrival-list"><p>Listening…</p></div>
+          </div>
+        </aside>
+      </div>
+    </div>
+
+    <dialog id="infoDialog">
+      <button class="close-dialog" id="closeInfo" aria-label="Close">×</button>
+      <p class="eyebrow"><span></span> THE FIELD MANUAL</p>
+      <h2>How to read <em>the block war.</em></h2>
+      <p>The three moving contenders are the next three projected block templates. They collide for spectacle, while their labels, capacity, transaction totals, median fees, and fee-band gates come from the live mempool.</p>
+      <p>Every unconfirmed transaction is bidding for space. Higher fee rates route toward <b>Block 1</b>; lower bands route toward Blocks 2 and 3. Anything below all three gates waits. Image inscriptions appear as rare animated cards decoded directly from their Bitcoin witness — hover or click one to inspect it.</p>
+      <button class="primary-button" id="gotIt">ENTER THE FIELD</button>
+    </dialog>
+
+    <dialog id="nodeDialog">
+      <button class="close-dialog" id="closeNode" aria-label="Close">×</button>
+      <p class="eyebrow"><span></span> DATA SOURCE</p>
+      <h2>Run it on <em>your own node.</em></h2>
+      <p>Blockfield reads a mempool.space-compatible REST API. Point it at your own self-hosted mempool instance — a Start9 <b>Mempool</b> service, Umbrel, or any mempool.space install — and every stat, block and transaction comes straight from your node.</p>
+      <label class="node-field">
+        <span>NODE API BASE URL</span>
+        <input id="nodeInput" type="text" spellcheck="false" autocomplete="off" placeholder="https://mempool.example" />
+      </label>
+      <p class="node-hint" id="nodeHint">The <code>/api</code> suffix is added automatically. Must be reachable from this browser (same LAN / Tor / hostname).</p>
+      <div class="node-actions">
+        <button class="primary-button" id="useNode">USE MY NODE</button>
+        <button class="ghost-button" id="usePublic">USE MEMPOOL.SPACE</button>
+      </div>
+    </dialog>
+    <dialog id="inscriptionDialog" class="inscription-dialog">
+      <button class="close-dialog" id="closeInscription" aria-label="Close">×</button>
+      <p class="eyebrow"><span></span> INSCRIPTION RADAR</p>
+      <h2>Put on-chain art <em>in the fight.</em></h2>
+      <p>Paste a mempool.space transaction link or a 64-character txid. Blockfield reads Ordinals envelopes directly from the witness and safely renders supported image media — even before confirmation.</p>
+      <label class="node-field">
+        <span>INSCRIPTION TRANSACTION</span>
+        <input id="inscriptionInput" type="text" spellcheck="false" autocomplete="off" value="b9a03a958e7af268f1e4e320f56d7c33eec6443bc2f93e1dfae51619a9b60043" />
+      </label>
+      <div class="inscription-result" id="inscriptionResult">
+        <div class="inscription-preview" id="inscriptionPreview"><span>✦</span></div>
+        <div><b id="inscriptionStatus">RADAR ARMED</b><small id="inscriptionMeta">Featured animated GIF ready to scan</small></div>
+      </div>
+      <div class="node-actions">
+        <button class="primary-button" id="trackInscription">SEND TO BLOCKFIELD</button>
+      </div>
+    </dialog>
+
+
+    <script src="app.js?v=7"></script>
+  </body>
+</html>
