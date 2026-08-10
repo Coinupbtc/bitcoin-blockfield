@@ -1,5 +1,21 @@
 # Blockfield
 
+## At a glance
+
+| | |
+|---|---|
+| **What it is** | A live Bitcoin mempool visualizer (next-block fee wars + inscriptions). |
+| **What it’s for** | See fee pressure and inscription activity at a glance. |
+| **How to use it** | ./setup.sh or open index.html; optional ?node= for your mempool. |
+
+## Try it
+
+### One command
+```bash
+git clone https://github.com/Coinupbtc/bitcoin-blockfield.git
+cd bitcoin-blockfield && ./setup.sh
+```
+
 A self-contained, responsive Bitcoin mempool visualization. It uses the public mempool.space API in the browser for the current block, mempool, and fee estimates; if the API is unavailable, it keeps a clearly labelled local fallback state.
 
 ## Run it
