@@ -1,53 +1,62 @@
 # Blockfield
 
-Self-contained, responsive **Bitcoin mempool visualization**. Uses the public mempool.space API in the browser (or your own mempool.space-compatible node). Offline → clearly labelled local fallback.
+A self-contained, responsive Bitcoin mempool visualization. It uses the public mempool.space API in the browser for the current block, mempool, and fee estimates; if the API is unavailable, it keeps a clearly labelled local fallback state.
 
-## At a glance
+## Run it
 
-| | |
-|---|---|
-| **What it is** | A self-contained **Bitcoin mempool visualizer** (projected block war, fee bands, inscription radar) driven by mempool.space-compatible APIs. |
-| **What it’s for** | See what’s fighting into the next blocks and how fees route — at a glance — against public or self-hosted mempool data. |
-| **How to use it** | `./setup.sh` → **http://127.0.0.1:8080/**, or open `index.html`. Point at your node via the badge / `?node=` URL. |
+Open `index.html` in a browser, or serve the directory with any static file server:
 
-## Try it (pick one)
-
-### One command
 ```bash
-git clone https://github.com/Coinupbtc/bitcoin-blockfield.git
-cd bitcoin-blockfield && ./setup.sh
-# open http://127.0.0.1:8080/
+cd /path/to/bitcoin-blockfield
+python3 -m http.server 8080
 ```
 
-### Copy-paste
-```bash
-git clone https://github.com/Coinupbtc/bitcoin-blockfield.git && cd bitcoin-blockfield
-python3 -m http.server 8080 --bind 127.0.0.1
-```
+Then visit `http://localhost:8080`.
 
-### One click (no install)
-Open [`index.html`](index.html) directly in a browser (double-click / File → Open). Some browsers restrict local `fetch`; if the API fails, use `./setup.sh` instead.
+## Run it against your own node
 
-## Point it at your own node
+Blockfield reads a mempool.space-compatible REST/WS API, so it can run entirely
+off a self-hosted node (Start9 **Mempool** service, Umbrel, or any mempool.space
+install). Three ways to point it at yours:
 
 - Click the **data-source badge** in the top bar and paste your node URL, or
-- add `?node=https://mempool.example` (or `?api=`) to the URL, or
-- it remembers the last node via `localStorage`.
+- add `?node=https://mempool.your-start9.local` (or `?api=`) to the URL, or
+- it remembers the last node you set (via `localStorage`).
 
-The `/api` suffix is added automatically. If your node stops responding it falls back to public mempool.space and flags **NODE UNREACHABLE**.
+The `/api` suffix is added automatically. If your node stops responding it falls
+back to the public mempool.space API and flags the badge **NODE UNREACHABLE**.
+Block/tx links and the live combat feed all resolve against whichever source is
+active.
 
 ## What's on the field (v7)
 
-Single-screen console — everything fits one viewport on desktop (stacks on mobile).
+Single-screen console — everything fits one viewport, no scrolling (it falls back
+to a stacked scroll layout under ~1180px / on mobile).
 
-**Projected Block War** (centre). The next three mempool block templates are full-size moving contenders. Capacity, tx count, median fee, colour, and fee gate are live data; 3D movement and the combat feed are the arcade layer. Transactions steer toward Block 1/2/3 by real projected fee bands.
+**Projected Block War** (centre). The next three mempool block templates are
+full-size moving contenders. Their capacity, transaction count, median fee, colour,
+and fee gate are live data; their 3D movement, ricochets, collision sparks, and
+body-check combat feed are the arcade layer. Transactions steer toward Block 1, 2,
+or 3 according to the real projected fee bands, while anything below all three
+gates waits in the mempool.
 
-**Inscription Radar.** Paste a mempool.space tx URL or txid. Ordinals envelopes are decoded from witness data (safe image MIME allowlist only; HTML/SVG not executed).
+**Inscription Radar.** Paste a mempool.space transaction URL or txid to put its
+on-chain image into the field. The featured unconfirmed GIF transaction is loaded
+on startup, and the radar rate-limits a scan of large live arrivals. Blockfield
+decodes Ordinals envelopes directly from transaction witness data, so previews work
+before an indexer sees the inscription. Only a safe image MIME allowlist is rendered;
+HTML and SVG payloads are not executed. Hover a card for media, size, fee, and
+confirmation state; click it to open the transaction.
 
-**Rails:** network height / mempool / hashrate / difficulty / halving; fee routes with fiat cost; next-block template; live arrivals. BTC price in the top bar.
+**Block chain strip** — the next 3 projected templates and last 5 confirmed blocks.
 
-Block-found flash, sound toggle, pause, responsive sizing, and `prefers-reduced-motion` are retained.
+**Left rail (network):** height, mempool size + unconfirmed fees, purge floor,
+hashrate, **difficulty adjustment** (change %, progress, ETA), **halving countdown**
++ current subsidy.
 
-## License
+**Right rail:** fee routes with **fiat cost per typical tx** (needs live price),
+next-block template (tx / vMB / median / spread / miner reward), last block, and a
+live arrivals ticker. BTC price sits in the top bar.
 
-MIT
+Block-found flash, event sound toggle, pause control, responsive sizing, and
+`prefers-reduced-motion` support are retained.

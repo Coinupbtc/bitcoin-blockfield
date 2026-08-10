@@ -859,7 +859,7 @@ function initInteractions() {
   const dialog = $('nodeDialog');
   $('nodeBadge').addEventListener('click', () => { $('nodeInput').value = source.custom ? explorerBase() : ''; dialog.showModal(); });
   $('closeNode').addEventListener('click', () => dialog.close());
-  $('useNode').addEventListener('click', () => { const v = $('nodeInput').value.trim(); if (!v) { $('nodeHint').textContent = 'Enter your node URL first — e.g. https://mempool.example'; return; } dialog.close(); applySource(v); });
+  $('useNode').addEventListener('click', () => { const v = $('nodeInput').value.trim(); if (!v) { $('nodeHint').textContent = 'Enter your node URL first — e.g. https://mempool.your-start9.local'; return; } dialog.close(); applySource(v); });
   $('usePublic').addEventListener('click', () => { dialog.close(); applySource(PUBLIC_API); });
   const inscriptionDialog = $('inscriptionDialog');
   $('inscriptionRadar').addEventListener('click', () => inscriptionDialog.showModal());
