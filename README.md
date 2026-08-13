@@ -12,6 +12,9 @@
 
 ## Try it
 
+### One click
+Open **[the GitHub Pages build](https://coinupbtc.github.io/bitcoin-blockfield/)** (live mempool.space API in the browser).
+
 ### One command
 ```bash
 git clone https://github.com/Coinupbtc/bitcoin-blockfield.git
