@@ -48,6 +48,9 @@ const state = {
   syncedAt: null, loading: false, pressure: 0
 };
 const setText = (id, v) => { const el = $(id); if (el) el.textContent = v; };
+// API strings (ids, txids) come from whatever node ?node= / ?api= names, so escape them before any innerHTML.
+const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ESC[c]);
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const txRate = (tx) => Math.max(0.1, tx.fee / tx.vsize);
 const timeAgo = (s) => { if (!s || s < 60) return 'just now'; const m = Math.floor(s / 60); return m < 60 ? m + ' min ago' : Math.floor(m / 60) + ' hr ago'; };
@@ -196,7 +199,7 @@ function renderChain() {
   }).join('');
   if (conf) conf.innerHTML = state.blocks.slice(0, 5).map((b) => {
     const c = feeColor(b.extras?.medianFee || 2);
-    return '<a class="blk conf" href="' + explorerBase() + '/block/' + b.id + '" target="_blank" rel="noreferrer" style="--c:' + rgb(c) + '">' +
+    return '<a class="blk conf" href="' + esc(explorerBase() + '/block/' + b.id) + '" target="_blank" rel="noreferrer" style="--c:' + rgb(c) + '">' +
       '<s>' + timeAgo(Date.now() / 1000 - b.timestamp).replace(' ago', '') + '</s>' +
       '<u>' + fmt.format(b.height).slice(-3) + '</u><em>' + fmt.format(b.tx_count) + ' tx</em></a>';
   }).join('');
@@ -209,7 +212,7 @@ function renderArrivals() {
   list.innerHTML = state.recent.slice(0, 5).map((tx, i) => {
     const fee = txRate(tx); const c = feeColor(fee);
     return '<div class="arrival" style="--c:' + rgb(c) + ';animation-delay:' + i * 40 + 'ms">' +
-      '<i></i><div><code>' + tx.txid.slice(0, 10) + '</code><small>' + (tx.vsize || 0) + ' vB · ' + (fee >= cutoff ? 'clears cutoff' : 'below cutoff') + '</small></div>' +
+      '<i></i><div><code>' + esc(String(tx.txid).slice(0, 10)) + '</code><small>' + (Number(tx.vsize) || 0) + ' vB · ' + (fee >= cutoff ? 'clears cutoff' : 'below cutoff') + '</small></div>' +
       '<b>' + fee.toFixed(1) + '</b></div>';
   }).join('');
 }
@@ -768,9 +771,9 @@ function createBlockWar() {
       const info = hovered.card.info, rate = info.fee / Math.max(1, info.vsize);
       if (tip._id !== info.id) {
         tip._id = info.id; tip.classList.add('inscription');
-        tip.innerHTML = '<img class="tip-media" src="' + info.url + '" alt="Bitcoin inscription preview">' +
-          '<code>' + info.id.slice(0, 18) + '…</code>' +
-          '<div class="tip-row"><span>MEDIA</span><b>' + info.mime + '</b></div>' +
+        tip.innerHTML = '<img class="tip-media" src="' + esc(info.url) + '" alt="Bitcoin inscription preview">' +
+          '<code>' + esc(String(info.id).slice(0, 18)) + '…</code>' +
+          '<div class="tip-row"><span>MEDIA</span><b>' + esc(info.mime) + '</b></div>' +
           '<div class="tip-row"><span>ON-CHAIN</span><b>' + fmt.format(info.bytes) + ' bytes</b></div>' +
           '<div class="tip-row"><span>FEE RATE</span><b>' + rate.toFixed(2) + ' sat/vB</b></div>' +
           '<div class="tip-row"><span>STATUS</span><b>' + (info.confirmed ? 'confirmed' : 'unconfirmed') + '</b></div>' +
@@ -781,7 +784,7 @@ function createBlockWar() {
       const p = hovered.p;
       if (tip._id !== p.txid) {
         tip._id = p.txid; tip.classList.remove('inscription');
-        tip.innerHTML = '<code>' + p.txid.slice(0, 18) + '…</code>' +
+        tip.innerHTML = '<code>' + esc(String(p.txid).slice(0, 18)) + '…</code>' +
           '<div class="tip-row"><span>FEE RATE</span><b>' + p.fee.toFixed(1) + ' sat/vB</b></div>' +
           '<div class="tip-row"><span>WEIGHT</span><b>' + fmt.format(p.vsize) + ' vB</b></div>' +
           '<div class="tip-row"><span>VALUE</span><b>' + (p.value / 1e8).toFixed(4) + ' BTC</b></div>' +
